@@ -1,47 +1,32 @@
-// Fetch and display the travel plan
 fetch('travel_plan.json')
-  .then(response => response.json())
+  .then(res => res.json())
   .then(data => {
-    const outputDiv = document.getElementById('travel-plan-output');
+    const div = document.getElementById('travel-plan-output');
     let html = `
-      <h2>Travel Plan for ${data.destination || 'Your Trip'}</h2>
-      <p><strong>Duration:</strong> ${data.duration || 'N/A'}</p>
-      <p><strong>Interests:</strong> ${data.interests ? data.interests.join(', ') : 'N/A'}</p>
-      <h3>Plan Details:</h3>
-      <ul>`;
+      <h2>Trip from ${data.origin} to ${data.destination}</h2>
+      <p><strong>Duration:</strong> ${data.duration}</p>
+      <p><strong>Interests:</strong> ${data.interests.join(', ')}</p>
+      <p><strong>Generated on:</strong> ${data.generated_on}</p>
+      <h3>Detailed Plan:</h3>
+    `;
 
-    data.plan.forEach(dayPlan => {
-      html += `
-        <li>
-          <span class="day-header">Day ${dayPlan.day || 'N/A'} (${dayPlan.date || 'N/A'})</span>
-          <ul>`;
-      dayPlan.activities.forEach(activity => {
-        if (typeof activity === 'object' && activity !== null) {
-          html += `
-            <li class="activity">
-              <strong>${activity.time || ''}</strong> ${activity.description || 'No description'}`;
-          if (activity.point_of_interest) {
-            const poi = activity.point_of_interest;
-            html += `
-              <div class="point-of-interest">
-                <strong>${poi.name || 'Point of Interest'}</strong> (${poi.type || 'N/A'})`;
-            if (poi.location) html += `<br>Location: ${poi.location}`;
-            if (poi.details) html += `<br>Details: ${poi.details}`;
-            html += `</div>`;
-          }
-          html += `</li>`;
-        } else {
-          html += `<li class="activity">${activity}</li>`;
+    data.plan.forEach(day => {
+      html += `<div class="plan-day"><strong>Day ${day.day} - ${day.date}</strong><br>`;
+      day.activities.forEach(act => {
+        html += `<div class="activity"><strong>${act.time}:</strong> ${act.description}`;
+        if (act.point_of_interest) {
+          html += `<div class="point-of-interest">
+                      <strong>${act.point_of_interest.name}</strong> (${act.point_of_interest.type})
+                   </div>`;
         }
+        html += `</div>`;
       });
-      html += `</ul></li>`;
+      html += `</div>`;
     });
 
-    html += `</ul>`;
-    outputDiv.innerHTML = html;
+    div.innerHTML = html;
   })
-  .catch(error => {
-    console.error('Error fetching or rendering travel plan:', error);
-    document.getElementById('travel-plan-output').innerHTML =
-      '<p style="color: red;">Error loading travel plan.</p>';
+  .catch(err => {
+    console.error('Error loading travel plan:', err);
+    document.getElementById('travel-plan-output').innerHTML = "<p style='color:red'>Error loading travel plan.</p>";
   });
